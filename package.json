@@ -1,0 +1,28 @@
+{
+  "name": "slack-mensa-crawler",
+  "version": "1.0.0",
+  "description": "Crawler and RESTful API for the daily menu of Munich's Studentenwerk's Mensa.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "mensa",
+    "api",
+    "crawler",
+    "slack",
+    "food",
+    "menu"
+  ],
+  "author": "Benedikt Reiser <benedikt.reiser@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.1",
+    "dateformat": "^2.0.0",
+    "request": "^2.81.0",
+    "request-promise-native": "^1.0.4"
+  },
+  "devDependencies": {
+    "eslint": "^4.1.0"
+  }
+}
