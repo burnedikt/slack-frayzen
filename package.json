@@ -17,8 +17,10 @@
   "author": "Benedikt Reiser <benedikt.reiser@gmail.com>",
   "license": "ISC",
   "dependencies": {
+    "@slack/client": "^3.10.0",
     "cheerio": "^1.0.0-rc.1",
     "dateformat": "^2.0.0",
+    "express": "^4.15.3",
     "request": "^2.81.0",
     "request-promise-native": "^1.0.4"
   },
