@@ -25,6 +25,7 @@
     "request-promise-native": "^1.0.4"
   },
   "devDependencies": {
-    "eslint": "^4.1.0"
+    "eslint": "^4.1.0",
+    "nodemon": "^1.11.0"
   }
 }
