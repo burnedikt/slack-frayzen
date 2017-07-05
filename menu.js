@@ -58,7 +58,7 @@ const unimensa_menu = () => {
           let vegan = false;
           // whether or not the meal is vegetarian
           let vegetarian = false;
-          let meatType = null;
+          let meatType;
           if (meatless > 0) {
             // meatless case
             vegetarian = true;
@@ -77,16 +77,16 @@ const unimensa_menu = () => {
             }
           }
           // check allergenes
-          let allergenes = $ele.data('essen-allergene').trim();
+          let allergenes = $ele.data('essen-allergene');
           if (allergenes) {
-            allergenes = allergenes.split(',');
+            allergenes = allergenes.trim().split(',');
           } else {
             allergenes = [];
           }
           // and additives
-          let additives = $ele.data('essen-zusatz').trim();
+          let additives = $ele.data('essen-zusatz');
           if (additives) {
-            additives = additives.split(',');
+            additives = additives.trim().split(',');
           } else {
             additives = [];
           }
