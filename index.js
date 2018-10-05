@@ -57,15 +57,15 @@ const menuToSlackMessage = (_menu) => {
         let meatTypeEmoji;
         switch (meal.meatType) {
         case menu.meat_types.SCHWEIN:
-          meatTypeEmoji = ':pig:';
+          meatTypeEmoji = ' :pig:';
           break;
         case menu.meat_types.RIND:
-          meatTypeEmoji = ':cow:';
+          meatTypeEmoji = ' :cow:';
           break;
         default:
           meatTypeEmoji = '';
         }
-        msg += `${meal.name} ${meatTypeEmoji} ${(meal.vegan || meal.vegetarian) ? ':tomato:' : ''}\n`;
+        msg += `${meal.name}${meatTypeEmoji}${(meal.vegan || meal.vegetarian) ? ' :tomato:' : ''} (${meal.nameEnglish})\n`;
       });
 
       msg += '\n*Guten Appetit! :fork_and_knife:*';

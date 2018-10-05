@@ -2,6 +2,12 @@
 const cheerio = require('cheerio');
 const request = require('request-promise-native');
 const dateformat = require('dateformat');
+const translate = require('translate');
+
+// we'll alway input german texts to the translation service
+translate.from = 'de';
+translate.engine = 'google';
+translate.key = process.env.TRANSLATE_KEY;
 
 // supported mensa types
 const MENSA_TYPES = Object.freeze({
@@ -30,6 +36,22 @@ class RemoteMenu extends Menu {
   }
 }
 
+function translateMenuToEnglish(menu) {
+  return Promise.all(menu.meals.map((meal) => {
+    // translate the meal's name to english
+    return translate(meal.name, 'en').then(text => {
+      meal.nameEnglish = text;
+      return meal;
+    }).catch(err => {
+      console.error(err);
+    });
+  }))
+  .then((meals) => {
+    menu.meals = meals;
+    return menu;
+  });
+}
+
 // request the menu
 const unimensa_menu = () => {
   // main menu url
@@ -49,7 +71,7 @@ const unimensa_menu = () => {
           let $ele = $(element);
           // get the text node only
           let name = $ele.find('.js-schedule-dish-description')
-            .contents().filter(function(){
+            .contents().filter(function () {
               return this.nodeType == 3;
             }).text().trim();
           // check whether the meal is with or without meat
@@ -69,30 +91,39 @@ const unimensa_menu = () => {
             // meat case
             let meatTypeString = $ele.data('essen-typ');
             switch (meatTypeString) {
-            case 'S':
-              meatType = MEAT_TYPES.SCHWEIN;
-              break;
-            case 'R':
-              meatType = MEAT_TYPES.RIND;
+              case 'S':
+                meatType = MEAT_TYPES.SCHWEIN;
+                break;
+              case 'R':
+                meatType = MEAT_TYPES.RIND;
             }
           }
           // check allergenes
           let allergenes = $ele.data('essen-allergene');
-          if (allergenes) {
+          if (allergenes && typeof allergenes === 'string') {
             allergenes = allergenes.trim().split(',');
           } else {
-            allergenes = [];
+            if (allergenes) {
+              allergenes = [allergenes];
+            } else {
+              allergenes = [];
+            }
           }
           // and additives
           let additives = $ele.data('essen-zusatz');
-          if (additives) {
+          if (additives && typeof additives === 'string') {
             additives = additives.trim().split(',');
           } else {
-            additives = [];
+            if (additives) {
+              additives = [additives]
+            } else {
+              additives = [];
+            }
           }
           // return all gathered information
           return {
-            'name' : name,
+            'name': name,
+            'nameEnglish': '',
             'vegan': vegan,
             'vegetarian': vegetarian,
             'meatType': meatType,
@@ -103,6 +134,7 @@ const unimensa_menu = () => {
         .toArray();
       return new Menu(MENSA_TYPES.UNIMENSA, meals);
     })
+    .then(translateMenuToEnglish)
     .catch((err) => {
       console.log(err);
     });
@@ -133,17 +165,17 @@ module.exports = {
   meat_types: MEAT_TYPES,
   loader: (mensa_type) => {
     switch (mensa_type) {
-    case MENSA_TYPES.UNIMENSA:
-      return unimensa_menu();
-    case MENSA_TYPES.FINANZKANTINE:
-      return finanzmensa_menu();
-    case MENSA_TYPES.BRUSKO:
-      return brusko_menu();
-    case MENSA_TYPES.OSTERIA:
-      return osteria_menu();
-    default:
-      console.error('No matching loader found for mensa type...');
-      return undefined;
+      case MENSA_TYPES.UNIMENSA:
+        return unimensa_menu();
+      case MENSA_TYPES.FINANZKANTINE:
+        return finanzmensa_menu();
+      case MENSA_TYPES.BRUSKO:
+        return brusko_menu();
+      case MENSA_TYPES.OSTERIA:
+        return osteria_menu();
+      default:
+        console.error('No matching loader found for mensa type...');
+        return undefined;
     }
   }
 };
