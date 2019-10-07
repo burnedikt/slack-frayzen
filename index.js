@@ -69,8 +69,7 @@ const menuToSlackMessage = _menu => {
         }
         msg += `${meal.name}${meatTypeEmoji}${
           meal.vegan || meal.vegetarian ? " :tomato:" : ""
-        }${meal.nameEnglish ? ` (${meal.nameEnglish})` : ""}
-        }\n`;
+        }${meal.nameEnglish ? ` (${meal.nameEnglish})` : ""}\n`;
       });
 
       msg += "\n*Guten Appetit! :fork_and_knife:*";
