@@ -1,17 +1,17 @@
-const menu = require('./menu');
+const menu = require("./menu");
 
-const RtmClient = require('@slack/client').RtmClient;
+const RtmClient = require("@slack/client").RtmClient;
 
 // The memory data store is a collection of useful functions we can include in our RtmClient
-const MemoryDataStore = require('@slack/client').MemoryDataStore;
-const CLIENT_EVENTS = require('@slack/client').CLIENT_EVENTS;
-const RTM_EVENTS = require('@slack/client').RTM_EVENTS;
+const MemoryDataStore = require("@slack/client").MemoryDataStore;
+const CLIENT_EVENTS = require("@slack/client").CLIENT_EVENTS;
+const RTM_EVENTS = require("@slack/client").RTM_EVENTS;
 
-const bot_token = process.env.SLACK_BOT_TOKEN || '';
+const bot_token = process.env.SLACK_BOT_TOKEN || "";
 
 const rtm = new RtmClient(bot_token, {
   // Sets the level of logging we require
-  logLevel: 'info',
+  logLevel: "info",
   // Initialise a data store for our client, this will load additional helper functions for the storing and retrieval of data
   dataStore: new MemoryDataStore()
 });
@@ -21,12 +21,14 @@ rtm.start();
 let user, team, generalChannelId;
 
 // The client will emit an RTM.AUTHENTICATED event on successful connection, with the `rtm.start` payload if you want to cache it
-rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, function (rtmStartData) {
-  console.log(`Logged in as ${rtmStartData.self.name} of team ${rtmStartData.team.name}, but not yet connected to a channel`);
+rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, function(rtmStartData) {
+  console.log(
+    `Logged in as ${rtmStartData.self.name} of team ${rtmStartData.team.name}, but not yet connected to a channel`
+  );
 
   // find the ID of the #general channel
   for (const c of rtmStartData.channels) {
-    if (c.is_member && c.name ==='general') {
+    if (c.is_member && c.name === "general") {
       generalChannelId = c.id;
     }
   }
@@ -41,34 +43,37 @@ rtm.on(CLIENT_EVENTS.RTM.RTM_CONNECTION_OPENED, () => {
   team = rtm.dataStore.getTeamById(rtm.activeTeamId);
 
   // Log the slack team name and the bot's name
-  console.log('Connected to ' + team.name + ' as ' + user.name);
+  console.log("Connected to " + team.name + " as " + user.name);
 });
 
-const menuToSlackMessage = (_menu) => {
+const menuToSlackMessage = _menu => {
   // check the type of menu we got and handle it accordingly:
   if (_menu instanceof menu.RemoteMenu) {
     // non parseable menu but we got a remote link to it
     return `Weiß ich auch nicht genau, aber das komplette Menü findest du für gewöhnlich hier: ${_menu.url}`;
   } else {
     // default menu
-    let msg = 'Heute gibt es wohl folgendes:\n\n';
+    let msg = "Heute gibt es wohl folgendes:\n\n";
     if (_menu.meals) {
-      _menu.meals.forEach((meal) => {
+      _menu.meals.forEach(meal => {
         let meatTypeEmoji;
         switch (meal.meatType) {
-        case menu.meat_types.SCHWEIN:
-          meatTypeEmoji = ' :pig:';
-          break;
-        case menu.meat_types.RIND:
-          meatTypeEmoji = ' :cow:';
-          break;
-        default:
-          meatTypeEmoji = '';
+          case menu.meat_types.SCHWEIN:
+            meatTypeEmoji = " :pig:";
+            break;
+          case menu.meat_types.RIND:
+            meatTypeEmoji = " :cow:";
+            break;
+          default:
+            meatTypeEmoji = "";
         }
-        msg += `${meal.name}${meatTypeEmoji}${(meal.vegan || meal.vegetarian) ? ' :tomato:' : ''} (${meal.nameEnglish})\n`;
+        msg += `${meal.name}${meatTypeEmoji}${
+          meal.vegan || meal.vegetarian ? " :tomato:" : ""
+        }${meal.nameEnglish ? ` (${meal.nameEnglish})` : ""}
+        }\n`;
       });
 
-      msg += '\n*Guten Appetit! :fork_and_knife:*';
+      msg += "\n*Guten Appetit! :fork_and_knife:*";
     }
     return msg;
   }
@@ -114,15 +119,19 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
       }
       // if we didn't find out the restaurant, let them know
       if (!restaurant_type) {
-        console.warn('Could not identify requested restaurant ...');
-        rtm.sendMessage('Keine Ahnung! Sorry! :disappointed_relieved:', message.channel);
+        console.warn("Could not identify requested restaurant ...");
+        rtm.sendMessage(
+          "Keine Ahnung! Sorry! :disappointed_relieved:",
+          message.channel
+        );
         return;
       }
-      menu.loader(restaurant_type)
-        .then((_menu) => {
+      menu
+        .loader(restaurant_type)
+        .then(_menu => {
           rtm.sendMessage(menuToSlackMessage(_menu), message.channel);
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err);
         });
       // no further checks required
